@@ -65,6 +65,18 @@ const borrowBook = async (req, res) => {
       return res.status(404).json({ message: "Book not found" });
     }
 
+    // 检查书籍是否已经被用户借阅且尚未归还
+    const user = await User.findById(userId);
+    const alreadyBorrowed = user.borrowHistory.some(
+      (borrow) => borrow.bookId.equals(bookId) && borrow.status === "borrowed"
+    );
+
+    if (alreadyBorrowed) {
+      return res
+        .status(400)
+        .json({ message: "You have already borrowed this book" });
+    }
+
     // 检查剩余书籍数量
     if (book.copiesAvailable <= 0) {
       return res.status(400).json({ message: "No copies available" });
@@ -75,7 +87,6 @@ const borrowBook = async (req, res) => {
     await book.save();
 
     // 更新用户的借书历史
-    const user = await User.findById(userId);
     user.borrowHistory.push({
       bookId: book._id,
       borrowDate: new Date(),
