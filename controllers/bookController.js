@@ -91,4 +91,40 @@ const borrowBook = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-module.exports = { addBook, getBooks, updateBook, deleteBook, borrowBook };
+
+const returnBook = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    const book = await Book.findById(req.params.id);
+
+    // Update user borrow history
+    const borrowEntry = user.borrowHistory.find(
+      (entry) =>
+        entry.bookId.toString() === book._id.toString() &&
+        entry.status === "borrowed"
+    );
+    if (!borrowEntry)
+      return res
+        .status(400)
+        .json({ message: "Book not found in borrow history" });
+
+    borrowEntry.status = "returned";
+    await user.save();
+
+    // Increase book copies available
+    book.copiesAvailable += 1;
+    await book.save();
+
+    res.json({ message: "Book returned successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to return the book" });
+  }
+};
+module.exports = {
+  addBook,
+  getBooks,
+  updateBook,
+  deleteBook,
+  borrowBook,
+  returnBook,
+};

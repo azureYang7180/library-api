@@ -96,4 +96,24 @@ const getProfile = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-module.exports = { registerUser, loginUser, changePassword, getProfile };
+
+const getBorrowedBooks = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate(
+      "borrowHistory.bookId"
+    );
+    const borrowedBooks = user.borrowHistory.filter(
+      (entry) => entry.status === "borrowed"
+    );
+    res.json(borrowedBooks.map((entry) => entry.bookId));
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch borrowed books" });
+  }
+};
+module.exports = {
+  registerUser,
+  loginUser,
+  changePassword,
+  getProfile,
+  getBorrowedBooks,
+};

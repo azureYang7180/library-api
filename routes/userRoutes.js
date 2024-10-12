@@ -5,6 +5,7 @@ const {
   loginUser,
   getProfile,
   changePassword,
+  getBorrowedBooks,
 } = require("../controllers/userController");
 const { uploadAvatar } = require("../controllers/uploadAvatarController");
 const authMiddleware = require("../middleware/authMiddleware");
@@ -22,5 +23,7 @@ router.post("/change-password", authMiddleware, changePassword);
 router.post("/upload-avatar", authMiddleware, uploadAvatar);
 
 router.get("/profile", authMiddleware, getProfile);
+
+router.get("/borrowed-books", authMiddleware, getBorrowedBooks);
 
 module.exports = router;
