@@ -110,10 +110,35 @@ const getBorrowedBooks = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch borrowed books" });
   }
 };
+const resetNotifications = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    user.notifications = 0;
+    await user.save();
+    res.json({ message: "Notifications reset" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+const getNotifications = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ notifications: user.notifications });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   changePassword,
   getProfile,
   getBorrowedBooks,
+  resetNotifications,
+  getNotifications,
 };

@@ -6,6 +6,8 @@ const {
   getProfile,
   changePassword,
   getBorrowedBooks,
+  getNotifications,
+  resetNotifications,
 } = require("../controllers/userController");
 const { uploadAvatar } = require("../controllers/uploadAvatarController");
 const authMiddleware = require("../middleware/authMiddleware");
@@ -25,5 +27,9 @@ router.post("/upload-avatar", authMiddleware, uploadAvatar);
 router.get("/profile", authMiddleware, getProfile);
 
 router.get("/borrowed-books", authMiddleware, getBorrowedBooks);
+
+router.get("/notifications", authMiddleware, getNotifications);
+
+router.post("/reset-notifications", authMiddleware, resetNotifications);
 
 module.exports = router;

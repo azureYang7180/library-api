@@ -108,29 +108,45 @@ const returnBook = async (req, res) => {
     const user = await User.findById(req.user.id);
     const book = await Book.findById(req.params.id);
 
-    // Update user borrow history
+    // 更新用户的借阅历史
     const borrowEntry = user.borrowHistory.find(
       (entry) =>
         entry.bookId.toString() === book._id.toString() &&
         entry.status === "borrowed"
     );
-    if (!borrowEntry)
+    if (!borrowEntry) {
       return res
         .status(400)
         .json({ message: "Book not found in borrow history" });
+    }
 
     borrowEntry.status = "returned";
     await user.save();
 
-    // Increase book copies available
+    // 增加书籍剩余数量
     book.copiesAvailable += 1;
     await book.save();
+
+    // 查找收藏了此书并且库存为0时收藏的用户，并更新他们的通知数字
+    if (book.copiesAvailable > 0) {
+      const usersWhoFavorited = await User.find({
+        favorites: book._id,
+      });
+
+      usersWhoFavorited.forEach(async (favoritingUser) => {
+        if (favoritingUser._id.toString() !== user._id.toString()) {
+          favoritingUser.notifications += 1;
+          await favoritingUser.save();
+        }
+      });
+    }
 
     res.json({ message: "Book returned successfully" });
   } catch (error) {
     res.status(500).json({ message: "Failed to return the book" });
   }
 };
+
 module.exports = {
   addBook,
   getBooks,

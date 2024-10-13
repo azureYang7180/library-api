@@ -49,6 +49,16 @@ const userSchema = new mongoose.Schema({
       ref: "Book",
     },
   ],
+  watchedBooks: [
+    {
+      bookId: { type: mongoose.Schema.Types.ObjectId, ref: "Book" },
+      hasReturned: { type: Boolean, default: false },
+    },
+  ],
+  notifications: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const User = mongoose.model("User", userSchema);

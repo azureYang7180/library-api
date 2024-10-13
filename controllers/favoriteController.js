@@ -4,21 +4,23 @@ const Book = require("../models/bookModel");
 
 // Add a book to the user's favorites
 const addFavorite = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id);
+  const user = await User.findById(req.user.id);
+  const book = await Book.findById(req.params.bookId);
 
-    // Check if the book is already in the user's favorites
-    if (!user.favorites.includes(req.params.bookId)) {
-      user.favorites.push(req.params.bookId);
-      await user.save();
-      return res.json({ message: "Book added to favorites" });
-    } else {
-      return res.status(400).json({ message: "Book already in favorites" });
+  if (!user.favorites.includes(book._id)) {
+    user.favorites.push(book._id);
+
+    if (book.copiesAvailable === 0) {
+      user.watchedBooks.push({
+        bookId: book._id,
+        hasReturned: false,
+      });
     }
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error adding favorite", error: error.message });
+
+    await user.save();
+    res.json({ message: "Book added to favorites" });
+  } else {
+    res.status(400).json({ message: "Book already in favorites" });
   }
 };
 
