@@ -110,6 +110,24 @@ const getBorrowedBooks = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch borrowed books" });
   }
 };
+
+const getAllBorrowedBooks = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate(
+      "borrowHistory.bookId"
+    );
+    res.json(
+      user.borrowHistory.map((entry) => ({
+        title: entry.bookId.title,
+        category: entry.bookId.category || "Uncategorized",
+        borrowDate: entry.borrowDate,
+      }))
+    );
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch borrowed books history" });
+  }
+};
+
 const resetNotifications = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -139,6 +157,7 @@ module.exports = {
   changePassword,
   getProfile,
   getBorrowedBooks,
+  getAllBorrowedBooks,
   resetNotifications,
   getNotifications,
 };

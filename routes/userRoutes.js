@@ -6,6 +6,7 @@ const {
   getProfile,
   changePassword,
   getBorrowedBooks,
+  getAllBorrowedBooks,
   getNotifications,
   resetNotifications,
 } = require("../controllers/userController");
@@ -27,6 +28,8 @@ router.post("/upload-avatar", authMiddleware, uploadAvatar);
 router.get("/profile", authMiddleware, getProfile);
 
 router.get("/borrowed-books", authMiddleware, getBorrowedBooks);
+
+router.get("/all-borrowed-books", authMiddleware, getAllBorrowedBooks);
 
 router.get("/notifications", authMiddleware, getNotifications);
 
