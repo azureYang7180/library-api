@@ -46,11 +46,27 @@ const removeFavorite = async (req, res) => {
 // Get the user's favorite books
 const getFavorites = async (req, res) => {
   try {
-    // Populate favorite books information
-    const user = await User.findById(req.user.id).populate("favorites");
+    // Populate favorite books and borrow history information
+    const user = await User.findById(req.user.id)
+      .populate("favorites")
+      .populate("borrowHistory.bookId");
 
-    // Return the list of favorite books
-    return res.json(user.favorites);
+    // Map through user's favorites to check if the book is borrowed
+    const favoritesWithBorrowStatus = user.favorites.map((book) => {
+      const borrowedBook = user.borrowHistory.find(
+        (history) =>
+          history.bookId._id.toString() === book._id.toString() &&
+          history.status === "borrowed"
+      );
+
+      return {
+        ...book._doc,
+        isBorrowed: !!borrowedBook, // If borrowedBook exists, set isBorrowed to true
+      };
+    });
+
+    // Return the list of favorite books with borrow status
+    return res.json(favoritesWithBorrowStatus);
   } catch (error) {
     return res
       .status(500)
